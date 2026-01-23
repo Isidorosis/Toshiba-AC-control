@@ -363,3 +363,48 @@ class ToshibaAcDevice:
     @property
     def supported(self) -> ToshibaAcFeatures:
         return self._supported
+
+    @property
+    def ac_compressor_hz(self):
+        """Return the compressor frequency (Hz)."""
+        return self.fcu_state.compressor_hz
+
+    @property
+    def ac_discharge_temp(self):
+        """Return discharge temp (cduTdTemp)."""
+        return self.fcu_state.discharge_temp
+
+    @property
+    def ac_suction_temp(self):
+        """Return suction temp (cduTsTemp)."""
+        return self.fcu_state.suction_temp
+
+    @property
+    def ac_outdoor_coil_temp(self):
+        """Return outdoor coil temp (cduTeTemp)."""
+        return self.fcu_state.outdoor_coil_temp
+
+    @property
+    def ac_outdoor_fan_speed(self):
+        """Return outdoor fan speed step (cduFanRpm)."""
+        return self.fcu_state.outdoor_fan_speed
+
+    @property
+    def ac_expansion_valve_pulse(self):
+        """Return expansion valve position (cduPmvPulse)."""
+        return self.fcu_state.expansion_valve_pulse
+
+    @property
+    def ac_indoor_coil_inlet_temp(self):
+        """Return indoor coil inlet temp (fcuTcTemp)."""
+        return self.fcu_state.indoor_coil_inlet_temp
+
+    @property
+    def ac_indoor_coil_outlet_temp(self):
+        """Return indoor coil outlet temp (fcuTcjTemp)."""
+        return self.fcu_state.indoor_coil_outlet_temp
+
+    @property
+    def ac_indoor_fan_speed(self):
+        """Return indoor fan speed step (fcuFanRpm)."""
+        return self.fcu_state.indoor_fan_speed

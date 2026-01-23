@@ -1,34 +1,17 @@
-# Copyright 2022 Kamil Sroka
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
+# properties.py
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
-
 
 @dataclass
 class ToshibaAcDeviceEnergyConsumption:
     energy_wh: float
     since: datetime
 
-
 class ToshibaAcStatus(Enum):
     ON = auto()
     OFF = auto()
     NONE = None
-
 
 class ToshibaAcMode(Enum):
     AUTO = auto()
@@ -37,7 +20,6 @@ class ToshibaAcMode(Enum):
     DRY = auto()
     FAN = auto()
     NONE = None
-
 
 class ToshibaAcFanMode(Enum):
     AUTO = auto()
@@ -49,7 +31,6 @@ class ToshibaAcFanMode(Enum):
     HIGH = auto()
     NONE = None
 
-
 class ToshibaAcSwingMode(Enum):
     OFF = auto()
     SWING_VERTICAL = auto()
@@ -60,8 +41,8 @@ class ToshibaAcSwingMode(Enum):
     FIXED_3 = auto()
     FIXED_4 = auto()
     FIXED_5 = auto()
+    HADA_CARE = auto()  # <--- NEW FEATURE ADDED
     NONE = None
-
 
 class ToshibaAcPowerSelection(Enum):
     POWER_50 = auto()
@@ -69,13 +50,11 @@ class ToshibaAcPowerSelection(Enum):
     POWER_100 = auto()
     NONE = None
 
-
 class ToshibaAcMeritB(Enum):
     FIREPLACE_1 = auto()
     FIREPLACE_2 = auto()
     OFF = auto()
     NONE = None
-
 
 class ToshibaAcMeritA(Enum):
     HIGH_POWER = auto()
@@ -89,12 +68,10 @@ class ToshibaAcMeritA(Enum):
     OFF = auto()
     NONE = None
 
-
 class ToshibaAcAirPureIon(Enum):
     OFF = auto()
     ON = auto()
     NONE = None
-
 
 class ToshibaAcSelfCleaning(Enum):
     ON = auto()

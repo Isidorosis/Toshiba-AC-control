@@ -1,22 +1,7 @@
-# Copyright 2021 Kamil Sroka
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+# fcu_state.py
 from __future__ import annotations
-
 import struct
 import typing as t
-
 from toshiba_ac.device.properties import (
     ToshibaAcAirPureIon,
     ToshibaAcFanMode,
@@ -29,7 +14,6 @@ from toshiba_ac.device.properties import (
     ToshibaAcSwingMode,
 )
 
-
 class ToshibaAcFcuState:
     NONE_VAL = 0xFF
     NONE_VAL_HALF = 0x0F
@@ -41,13 +25,13 @@ class ToshibaAcFcuState:
         def from_raw(raw: int) -> t.Optional[int]:
             raw_to_temp: t.Dict[int, t.Optional[int]] = {i: i for i in range(-128, 128)}
             raw_to_temp.update({127: None, -128: None, ToshibaAcFcuState.NONE_VAL_SIGNED: None, 126: -1})
-            return raw_to_temp[raw]
+            return raw_to_temp.get(raw, None)
 
         @staticmethod
         def to_raw(temperature: t.Optional[int]) -> int:
             temp_to_raw: t.Dict[t.Optional[int], int] = {i: i for i in range(-128, 128)}
             temp_to_raw.update({None: ToshibaAcFcuState.NONE_VAL_SIGNED, -1: 126})
-            return temp_to_raw[temperature]
+            return temp_to_raw.get(temperature, ToshibaAcFcuState.NONE_VAL_SIGNED)
 
     class AcStatus:
         @staticmethod
@@ -57,7 +41,7 @@ class ToshibaAcFcuState:
                 0x31: ToshibaAcStatus.OFF,
                 0x02: ToshibaAcStatus.NONE,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcStatus.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcStatus.NONE)
 
         @staticmethod
         def to_raw(status: ToshibaAcStatus) -> int:
@@ -78,7 +62,7 @@ class ToshibaAcFcuState:
                 0x45: ToshibaAcMode.FAN,
                 0x00: ToshibaAcMode.NONE,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcMode.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcMode.NONE)
 
         @staticmethod
         def to_raw(mode: ToshibaAcMode) -> int:
@@ -104,7 +88,7 @@ class ToshibaAcFcuState:
                 0x36: ToshibaAcFanMode.HIGH,
                 0x00: ToshibaAcFanMode.NONE,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcFanMode.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcFanMode.NONE)
 
         @staticmethod
         def to_raw(fan_mode: ToshibaAcFanMode) -> int:
@@ -132,9 +116,10 @@ class ToshibaAcFcuState:
                 0x52: ToshibaAcSwingMode.FIXED_3,
                 0x53: ToshibaAcSwingMode.FIXED_4,
                 0x54: ToshibaAcSwingMode.FIXED_5,
+                0x60: ToshibaAcSwingMode.HADA_CARE,  # <--- ADDED
                 0x00: ToshibaAcSwingMode.NONE,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcSwingMode.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcSwingMode.NONE)
 
         @staticmethod
         def to_raw(swing_mode: ToshibaAcSwingMode) -> int:
@@ -148,6 +133,7 @@ class ToshibaAcFcuState:
                 ToshibaAcSwingMode.FIXED_3: 0x52,
                 ToshibaAcSwingMode.FIXED_4: 0x53,
                 ToshibaAcSwingMode.FIXED_5: 0x54,
+                ToshibaAcSwingMode.HADA_CARE: 0x60,  # <--- ADDED
                 ToshibaAcSwingMode.NONE: ToshibaAcFcuState.NONE_VAL,
             }[swing_mode]
 
@@ -159,7 +145,7 @@ class ToshibaAcFcuState:
                 0x4B: ToshibaAcPowerSelection.POWER_75,
                 0x64: ToshibaAcPowerSelection.POWER_100,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcPowerSelection.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcPowerSelection.NONE)
 
         @staticmethod
         def to_raw(power_selection: ToshibaAcPowerSelection) -> int:
@@ -176,11 +162,11 @@ class ToshibaAcFcuState:
             return {
                 0x02: ToshibaAcMeritB.FIREPLACE_1,
                 0x03: ToshibaAcMeritB.FIREPLACE_2,
-                0x01: ToshibaAcMeritB.OFF,  # New value reported after update, nothing found in 3.4.0 APK version
+                0x01: ToshibaAcMeritB.OFF,
                 0x00: ToshibaAcMeritB.OFF,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcMeritB.NONE,
                 ToshibaAcFcuState.NONE_VAL_HALF: ToshibaAcMeritB.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcMeritB.NONE)
 
         @staticmethod
         def to_raw(merit_b: ToshibaAcMeritB) -> int:
@@ -206,7 +192,7 @@ class ToshibaAcFcuState:
                 0x00: ToshibaAcMeritA.OFF,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcMeritA.NONE,
                 ToshibaAcFcuState.NONE_VAL_HALF: ToshibaAcMeritA.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcMeritA.NONE)
 
         @staticmethod
         def to_raw(merit_a: ToshibaAcMeritA) -> int:
@@ -230,7 +216,7 @@ class ToshibaAcFcuState:
                 0x18: ToshibaAcAirPureIon.ON,
                 0x10: ToshibaAcAirPureIon.OFF,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcAirPureIon.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcAirPureIon.NONE)
 
         @staticmethod
         def to_raw(air_pure_ion: ToshibaAcAirPureIon) -> int:
@@ -247,7 +233,7 @@ class ToshibaAcFcuState:
                 0x18: ToshibaAcSelfCleaning.ON,
                 0x10: ToshibaAcSelfCleaning.OFF,
                 ToshibaAcFcuState.NONE_VAL: ToshibaAcSelfCleaning.NONE,
-            }[raw]
+            }.get(raw, ToshibaAcSelfCleaning.NONE)
 
         @staticmethod
         def to_raw(self_cleaning: ToshibaAcSelfCleaning) -> int:
@@ -276,6 +262,17 @@ class ToshibaAcFcuState:
         self._ac_indoor_temperature = ToshibaAcFcuState.NONE_VAL_SIGNED
         self._ac_outdoor_temperature = ToshibaAcFcuState.NONE_VAL_SIGNED
         self._ac_self_cleaning = ToshibaAcFcuState.NONE_VAL
+        
+        # --- NEW SENSORS ---
+        self._compressor_hz = 0           # cduCompHz
+        self._discharge_temp = 0          # cduTdTemp
+        self._suction_temp = 0            # cduTsTemp
+        self._outdoor_coil_temp = 0       # cduTeTemp
+        self._outdoor_fan_speed = 0       # cduFanRpm
+        self._expansion_valve_pulse = 0   # cduPmvPulse
+        self._indoor_coil_inlet_temp = 0  # fcuTcTemp
+        self._indoor_coil_outlet_temp = 0 # fcuTcjTemp
+        self._indoor_fan_speed = 0        # fcuFanRpm
 
     def encode(self) -> str:
         encoded = self.ENCODING_STRUCT.pack(
@@ -302,13 +299,12 @@ class ToshibaAcFcuState:
         ).hex()
         return (
             encoded[:12] + encoded[13] + encoded[15] + encoded[16:]
-        )  # Merit A/B features are encoded using half bytes but our packing added them as bytes
+        )
 
     def decode(self, hex_state: str) -> None:
         extended_hex_state = (
             hex_state[:12] + "0" + hex_state[12] + "0" + hex_state[13:38]
-        )  # Merit A/B features are encoded using half bytes but our unpacking expect them as bytes.
-        # We also ignore any extra bytes if present.
+        )
         data = self.ENCODING_STRUCT.unpack(bytes.fromhex(extended_hex_state))
         (
             self._ac_status,
@@ -332,25 +328,16 @@ class ToshibaAcFcuState:
 
     def update(self, hex_state: str) -> bool:
         state_update = ToshibaAcFcuState.from_hex_state(hex_state)
-
         changed = False
-
+        
+        # Standard Properties
         enum_states = [
-            "_ac_status",
-            "_ac_mode",
-            "_ac_fan_mode",
-            "_ac_swing_mode",
-            "_ac_power_selection",
-            "_ac_merit_b",
-            "_ac_merit_a",
-            "_ac_air_pure_ion",
-            "_ac_self_cleaning",
+            "_ac_status", "_ac_mode", "_ac_fan_mode", "_ac_swing_mode",
+            "_ac_power_selection", "_ac_merit_b", "_ac_merit_a",
+            "_ac_air_pure_ion", "_ac_self_cleaning",
         ]
-
         temperature_states = [
-            "_ac_temperature",
-            "_ac_indoor_temperature",
-            "_ac_outdoor_temperature",
+            "_ac_temperature", "_ac_indoor_temperature", "_ac_outdoor_temperature",
         ]
 
         for enum_state in enum_states:
@@ -380,8 +367,47 @@ class ToshibaAcFcuState:
             self._ac_outdoor_temperature = hb_data["oTemp"]
             changed = True
 
+        # --- NEW: Capture Hidden Engineering Sensors ---
+        # 1. Compressor Hz
+        if "cduCompHz" in hb_data and hb_data["cduCompHz"] != self._compressor_hz:
+            self._compressor_hz = hb_data["cduCompHz"]
+            changed = True
+        # 2. Discharge Temp
+        if "cduTdTemp" in hb_data and hb_data["cduTdTemp"] != self._discharge_temp:
+            self._discharge_temp = hb_data["cduTdTemp"]
+            changed = True
+        # 3. Suction Temp
+        if "cduTsTemp" in hb_data and hb_data["cduTsTemp"] != self._suction_temp:
+            self._suction_temp = hb_data["cduTsTemp"]
+            changed = True
+        # 4. Outdoor Coil Temp
+        if "cduTeTemp" in hb_data and hb_data["cduTeTemp"] != self._outdoor_coil_temp:
+            self._outdoor_coil_temp = hb_data["cduTeTemp"]
+            changed = True
+        # 5. Outdoor Fan Speed
+        if "cduFanRpm" in hb_data and hb_data["cduFanRpm"] != self._outdoor_fan_speed:
+            self._outdoor_fan_speed = hb_data["cduFanRpm"]
+            changed = True
+        # 6. Expansion Valve
+        if "cduPmvPulse" in hb_data and hb_data["cduPmvPulse"] != self._expansion_valve_pulse:
+            self._expansion_valve_pulse = hb_data["cduPmvPulse"]
+            changed = True
+        # 7. Indoor Coil Inlet
+        if "fcuTcTemp" in hb_data and hb_data["fcuTcTemp"] != self._indoor_coil_inlet_temp:
+            self._indoor_coil_inlet_temp = hb_data["fcuTcTemp"]
+            changed = True
+        # 8. Indoor Coil Outlet
+        if "fcuTcjTemp" in hb_data and hb_data["fcuTcjTemp"] != self._indoor_coil_outlet_temp:
+            self._indoor_coil_outlet_temp = hb_data["fcuTcjTemp"]
+            changed = True
+        # 9. Indoor Fan Speed (Raw)
+        if "fcuFanRpm" in hb_data and hb_data["fcuFanRpm"] != self._indoor_fan_speed:
+            self._indoor_fan_speed = hb_data["fcuFanRpm"]
+            changed = True
+        
         return changed
 
+    # --- PROPERTIES ---
     @property
     def ac_status(self) -> ToshibaAcStatus:
         return ToshibaAcFcuState.AcStatus.from_raw(self._ac_status)
@@ -478,6 +504,26 @@ class ToshibaAcFcuState:
     def ac_self_cleaning(self, val: ToshibaAcSelfCleaning) -> None:
         self._ac_self_cleaning = ToshibaAcFcuState.AcSelfCleaning.to_raw(val)
 
+    # --- NEW PROPERTIES FOR GUI/HA ---
+    @property
+    def compressor_hz(self) -> int: return self._compressor_hz
+    @property
+    def discharge_temp(self) -> int: return self._discharge_temp
+    @property
+    def suction_temp(self) -> int: return self._suction_temp
+    @property
+    def outdoor_coil_temp(self) -> int: return self._outdoor_coil_temp
+    @property
+    def outdoor_fan_speed(self) -> int: return self._outdoor_fan_speed
+    @property
+    def expansion_valve_pulse(self) -> int: return self._expansion_valve_pulse
+    @property
+    def indoor_coil_inlet_temp(self) -> int: return self._indoor_coil_inlet_temp
+    @property
+    def indoor_coil_outlet_temp(self) -> int: return self._indoor_coil_outlet_temp
+    @property
+    def indoor_fan_speed(self) -> int: return self._indoor_fan_speed
+
     def __str__(self) -> str:
         res = f"AcStatus: {self.ac_status.name}"
         res += f", AcMode: {self.ac_mode.name}"
@@ -491,5 +537,14 @@ class ToshibaAcFcuState:
         res += f", AcIndoorAcTemperature: {self.ac_indoor_temperature}"
         res += f", AcOutdoorAcTemperature: {self.ac_outdoor_temperature}"
         res += f", AcSelfCleaning: {self.ac_self_cleaning.name}"
-
+        # Print the new engineering data
+        res += f", CompHz: {self.compressor_hz}"
+        res += f", DischT: {self.discharge_temp}"
+        res += f", SuctT: {self.suction_temp}"
+        res += f", OutCoil: {self.outdoor_coil_temp}"
+        res += f", OutFan: {self.outdoor_fan_speed}"
+        res += f", PMV: {self.expansion_valve_pulse}"
+        res += f", InCoilIn: {self.indoor_coil_inlet_temp}"
+        res += f", InCoilOut: {self.indoor_coil_outlet_temp}"
+        res += f", InFan: {self.indoor_fan_speed}"
         return res
